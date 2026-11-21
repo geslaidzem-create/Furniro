@@ -1,0 +1,388 @@
+.single-product-page,
+.single-product-page * {
+  box-sizing: border-box;
+}
+
+.single-product-page {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  font-family: "Poppins", sans-serif;
+  color: #000000;
+  background-color: #ffffff;
+  text-align: left;
+}
+
+.single-breadcrumb-bar {
+  width: 100%;
+  background-color: #f9f1e7;
+  padding: 28px 100px;
+}
+
+.single-breadcrumb-bar__inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.single-breadcrumb__link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 16px;
+  color: #9f9f9f;
+  cursor: pointer;
+}
+
+.single-breadcrumb__link:hover {
+  color: #000000;
+}
+
+.single-breadcrumb__arrow {
+  color: #000000;
+  font-size: 14px;
+}
+
+.single-breadcrumb__divider {
+  color: #9f9f9f;
+  font-size: 20px;
+  margin-right: 6px;
+}
+
+.single-breadcrumb__current {
+  font-size: 16px;
+  color: #000000;
+}
+
+.single-product-main {
+  padding: 36px 100px 56px 100px;
+  display: grid;
+  grid-template-columns: minmax(320px, 1.05fr) minmax(320px, 1fr);
+  gap: 64px;
+  align-items: start;
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.single-product-gallery {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.single-product-thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.single-thumb-btn {
+  width: 76px;
+  height: 80px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background-color: #f9f1e7;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.single-thumb-btn.is-active {
+  border-color: #b88e2f;
+}
+
+.single-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.single-product-main-img-box {
+  flex: 1;
+  min-width: 0;
+  height: 500px;
+  background-color: #f9f1e7;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.single-product-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.single-product-title {
+  margin: 0 0 6px 0;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #000000;
+}
+
+.single-product-price {
+  margin: 0 0 12px 0;
+  font-size: 24px;
+  font-weight: 500;
+  color: #9f9f9f;
+}
+
+.single-product-rating {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.stars {
+  color: #ffc700;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+.rating-divider {
+  color: #9f9f9f;
+}
+
+.review-count {
+  font-size: 13px;
+  color: #9f9f9f;
+}
+
+.single-product-desc {
+  margin: 0 0 22px 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #000000;
+  max-width: 440px;
+}
+
+.single-option-group {
+  margin-bottom: 18px;
+}
+
+.single-option-label {
+  display: block;
+  font-size: 14px;
+  color: #9f9f9f;
+  margin-bottom: 10px;
+}
+
+.size-options {
+  display: flex;
+  gap: 14px;
+}
+
+.size-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 5px;
+  background-color: #f9f1e7;
+  color: #000000;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.size-btn.is-selected {
+  background-color: #b88e2f;
+  color: #ffffff;
+}
+
+.color-options {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.color-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.color-swatch.is-selected {
+  outline: 2px solid #b88e2f;
+  outline-offset: 2px;
+}
+
+.single-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.quantity-box {
+  height: 56px;
+  padding: 0 14px;
+  border: 1px solid #9f9f9f;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.quantity-box button {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #000000;
+}
+
+.add-to-cart-btn,
+.compare-btn {
+  height: 56px;
+  padding: 0 28px;
+  border-radius: 12px;
+  border: 1px solid #000000;
+  background-color: transparent;
+  color: #000000;
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.add-to-cart-btn:hover,
+.compare-btn:hover {
+  background-color: #f9f1e7;
+}
+
+.added-notice {
+  margin: 12px 0 0 0;
+  font-size: 14px;
+  color: #2e7d32;
+}
+
+.single-product-meta {
+  padding-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+}
+
+.meta-label {
+  width: 90px;
+  color: #9f9f9f;
+}
+
+.meta-colon {
+  width: 18px;
+  color: #9f9f9f;
+}
+
+.meta-value {
+  color: #9f9f9f;
+}
+
+.share-icons {
+  display: inline-flex;
+  gap: 16px;
+}
+
+.share-icons a {
+  color: #000000;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.single-product-tabs {
+  padding: 44px 100px 64px 100px;
+}
+
+.tabs-header {
+  display: flex;
+  justify-content: center;
+  gap: 52px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 22px;
+  color: #9f9f9f;
+  cursor: pointer;
+}
+
+.tab-btn.is-active {
+  color: #000000;
+  font-weight: 500;
+}
+
+.tabs-body {
+  max-width: 960px;
+  margin: 0 auto;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #9f9f9f;
+}
+
+.tabs-body p {
+  margin: 0 0 18px 0;
+}
+
+@media (max-width: 1024px) {
+  .single-breadcrumb-bar,
+  .single-product-main,
+  .single-product-tabs {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .single-product-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .single-product-gallery {
+    flex-direction: column-reverse;
+  }
+
+  .single-product-thumbnails {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .single-product-main-img-box {
+    height: 320px;
+  }
+
+  .single-product-title {
+    font-size: 28px;
+  }
+
+  .tabs-header {
+    gap: 24px;
+  }
+
+  .tab-btn {
+    font-size: 18px;
+  }
+}

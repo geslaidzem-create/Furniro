@@ -6,25 +6,36 @@ const DB_URL =
   "https://raw.githubusercontent.com/Ommadure/Furniture-ecommerce/main/data/db.json";
 
 function resolveApiImage(item) {
-  const raw =
-    item.image ||
-    item.img ||
-    item.imageUrl ||
-    item.imgUrl ||
-    item.thumbnail ||
-    item.photo ||
-    (Array.isArray(item.images) ? item.images[0] : "") ||
-    "";
+    const raw =
+        item.thumbnails?.[0]?.[5] ||
+        item.thumbnails?.[0]?.[4] ||
+        item.thumbnails?.[0]?.[3] ||
+        item.thumbnails?.[0]?.[0] ||
+        item.image ||
+        item.img ||
+        item.imageUrl ||
+        item.imgUrl ||
+        item.thumbnail ||
+        item.photo ||
+        (Array.isArray(item.images) ? item.images[0] : "") ||
+        "";
 
-  if (!raw || typeof raw !== "string") return "";
+    if (!raw || typeof raw !== "string") return "";
 
-  const trimmed = raw.trim();
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    return trimmed;
-  }
+    const trimmed = raw.trim();
 
-  const clean = trimmed.replace(/^\.?\//, "").replace(/^public\//, "");
-  return `https://raw.githubusercontent.com/Ommadure/Furniture-ecommerce/main/public/${clean}`;
+    if (
+        trimmed.startsWith("http://") ||
+        trimmed.startsWith("https://")
+    ) {
+        return trimmed;
+    }
+
+    const clean = trimmed
+        .replace(/^\.?\//, "")
+        .replace(/^public\//, "");
+
+    return `https://raw.githubusercontent.com/Ommadure/Furniture-ecommerce/main/public/${clean}`;
 }
 
 function normalizeProducts(data) {
@@ -44,8 +55,10 @@ function normalizeProducts(data) {
           : null);
 
     return {
-      id: item.id ?? index + 1,
+      ...item,
+      id: item.id ?? item.product_id ?? index + 1,
       name: item.name || item.title || `Product ${index + 1}`,
+      title: item.title || item.name || `Product ${index + 1}`,
       subtitle: item.subtitle || item.description || item.category || "",
       category: item.category || "General",
       price: Number(item.price) || 0,
@@ -169,11 +182,11 @@ function FeatureIcon({ type }) {
   );
 }
 
-function ShopPage({ onNavigateHome }) {
+function ShopPage({ onNavigateHome, onSelectProduct, onAddToCart }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [cartItems, setCartItems] = useState([]);
+  const [addedFeedback, setAddedFeedback] = useState(null);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -264,8 +277,21 @@ function ShopPage({ onNavigateHome }) {
     }
   };
 
-  const handleAddToCart = (product) => {
-    setCartItems((prev) => [...prev, product]);
+  const handleAddClick = (e, product) => {
+    e.stopPropagation();
+    if (typeof onAddToCart === "function") {
+      onAddToCart({ ...product, quantity: 1 });
+    }
+    setAddedFeedback(product.id);
+    setTimeout(() => {
+      setAddedFeedback((current) => (current === product.id ? null : current));
+    }, 1500);
+  };
+
+  const handleCardClick = (product) => {
+    if (typeof onSelectProduct === "function") {
+      onSelectProduct(product);
+    }
   };
 
   const showingStart =
@@ -333,7 +359,6 @@ function ShopPage({ onNavigateHome }) {
             <span className="results-count">
               Showing {showingStart}–{showingEnd} of {filteredAndSorted.length}{" "}
               results
-              {cartItems.length > 0 ? ` • Cart: ${cartItems.length}` : ""}
             </span>
           </div>
 
@@ -412,7 +437,12 @@ function ShopPage({ onNavigateHome }) {
               product.badge.toLowerCase() === "new";
 
             return (
-              <article key={product.id} className="product-card">
+              <article
+                key={product.id}
+                className="product-card"
+                onClick={() => handleCardClick(product)}
+                style={{ cursor: "pointer" }}
+              >
                 <div className="product-card__media">
                   {product.image && (
                     <img
@@ -438,14 +468,20 @@ function ShopPage({ onNavigateHome }) {
                     <button
                       type="button"
                       className="add-to-cart-btn"
-                      onClick={() => handleAddToCart(product)}
+                      onClick={(e) => handleAddClick(e, product)}
                     >
-                      Add to cart
+                      {addedFeedback === product.id ? "Added!" : "Add to cart"}
                     </button>
                     <div className="hover-actions">
-                      <button type="button">Share</button>
-                      <button type="button">Compare</button>
-                      <button type="button">Like</button>
+                      <button type="button" onClick={(e) => e.stopPropagation()}>
+                        Share
+                      </button>
+                      <button type="button" onClick={(e) => e.stopPropagation()}>
+                        Compare
+                      </button>
+                      <button type="button" onClick={(e) => e.stopPropagation()}>
+                        Like
+                      </button>
                     </div>
                   </div>
                 </div>

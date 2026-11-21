@@ -227,18 +227,19 @@ function CartPage({ onNavigateHome, onNavigateShop, items, setItems }) {
               </div>
             ) : (
               <div className="cart-rows">
-                {cartList.map((item) => {
+                {cartList.map((item, idx) => {
                   const qty = Number(item.quantity) || 1;
                   const price = Number(item.price) || 0;
                   const subtotal = price * qty;
+                  const displayName = item.name || item.title || "Product";
 
                   return (
-                    <div key={item.id} className="cart-row">
+                    <div key={`${item.id ?? displayName}-${idx}`} className="cart-row">
                       <div className="cart-row__thumb">
-                        {item.image && <img src={item.image} alt={item.name} />}
+                        {item.image && <img src={item.image} alt={displayName} />}
                       </div>
 
-                      <div className="cart-row__product">{item.name}</div>
+                      <div className="cart-row__product">{displayName}</div>
 
                       <div className="cart-row__price">{formatPrice(price)}</div>
 
@@ -247,7 +248,7 @@ function CartPage({ onNavigateHome, onNavigateShop, items, setItems }) {
                           type="number"
                           min="1"
                           max="99"
-                          aria-label={`${item.name} quantity`}
+                          aria-label={`${displayName} quantity`}
                           value={qty}
                           onChange={(e) =>
                             handleQuantityChange(item.id, e.target.value)
@@ -262,7 +263,7 @@ function CartPage({ onNavigateHome, onNavigateShop, items, setItems }) {
                       <div className="cart-row__remove">
                         <button
                           type="button"
-                          aria-label={`Remove ${item.name}`}
+                          aria-label={`Remove ${displayName}`}
                           onClick={() => handleRemoveItem(item.id)}
                         >
                           <TrashIcon />

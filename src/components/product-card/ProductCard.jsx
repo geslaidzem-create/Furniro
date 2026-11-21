@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import './productCard.scss';
 import productimg from '../../assets/images/productcardimg.png';
 
@@ -25,7 +26,21 @@ function resolveImageUrl(rawSrc) {
   return `${REPO_RAW_BASE}${cleaned}`;
 }
 
-function ProductCard({ product }) {
+function formatPrice(val) {
+  if (val === undefined || val === null || val === '') return '';
+  if (typeof val === 'number') {
+    return `Rp ${val.toLocaleString('id-ID')}`;
+  }
+  const numeric = Number(String(val).replace(/[^0-9.-]+/g, ''));
+  if (!Number.isNaN(numeric) && String(val).trim() !== '') {
+    return `Rp ${numeric.toLocaleString('id-ID')}`;
+  }
+  return String(val);
+}
+
+function ProductCard({ product, onSelectProduct, onAddToCart }) {
+  const [added, setAdded] = useState(false);
+
   const title = product?.title || product?.name || 'Syltherine';
   const description =
     product?.description ||
@@ -42,22 +57,46 @@ function ProductCard({ product }) {
     product?.images;
 
   const imageSrc = resolveImageUrl(rawImage);
+  const resolvedCardImg =
+    product?.thumbnails?.[0]?.[5] || product?.thumbnails?.[0]?.[0] || imageSrc;
 
   const currentPrice =
-    product?.price ?? product?.salePrice ?? product?.newPrice ?? '55₾';
+    product?.price ?? product?.salePrice ?? product?.newPrice ?? 55000;
   const oldPrice =
-    product?.oldPrice ?? product?.originalPrice ?? product?.comparePrice ?? '75₾';
+    product?.oldPrice ?? product?.originalPrice ?? product?.comparePrice ?? 75000;
 
-  const formatPrice = (val) => {
-    if (typeof val === 'number') return `${val}₾`;
-    return val;
+  const handleCardClick = () => {
+    if (typeof onSelectProduct === 'function') {
+      onSelectProduct(product);
+    }
+  };
+
+  const handleAddClick = (e) => {
+    e.stopPropagation();
+    if (typeof onAddToCart === 'function') {
+      onAddToCart({
+        ...product,
+        title,
+        name: title,
+        price: currentPrice,
+        image: resolvedCardImg,
+        quantity: 1,
+      });
+    }
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
   };
 
   return (
     <>
-      <div className="productCard" tabIndex={0}>
+      <div
+        className="productCard"
+        tabIndex={0}
+        onClick={handleCardClick}
+        style={{ cursor: 'pointer' }}
+      >
         <img
-          src={product.thumbnails?.[0]?.[5] || product.thumbnails?.[0]?.[0]}
+          src={resolvedCardImg}
           className="productCard-img"
           alt={title}
           onError={(e) => {
@@ -79,14 +118,22 @@ function ProductCard({ product }) {
         {/* PRODUCT CARD OVERLAY */}
 
         <div className="productCard-overlay">
-          <button type="button" className="productCard-overlay-button">
-            Add to cart
+          <button
+            type="button"
+            className="productCard-overlay-button"
+            onClick={handleAddClick}
+          >
+            {added ? 'Added!' : 'Add to cart'}
           </button>
 
           <div className="productCard-overlay-actions">
             {/* SHARE */}
 
-            <button type="button" className="overlay-action">
+            <button
+              type="button"
+              className="overlay-action"
+              onClick={(e) => e.stopPropagation()}
+            >
               <svg
                 width="16"
                 height="16"
@@ -109,7 +156,11 @@ function ProductCard({ product }) {
 
             {/* COMPARE */}
 
-            <button type="button" className="overlay-action">
+            <button
+              type="button"
+              className="overlay-action"
+              onClick={(e) => e.stopPropagation()}
+            >
               <svg
                 width="16"
                 height="16"
@@ -131,7 +182,11 @@ function ProductCard({ product }) {
 
             {/* LIKE */}
 
-            <button type="button" className="overlay-action">
+            <button
+              type="button"
+              className="overlay-action"
+              onClick={(e) => e.stopPropagation()}
+            >
               <svg
                 width="16"
                 height="16"
