@@ -1,6 +1,6 @@
-import HeroSection from './HeroSection/HeroSection';
-import CategorySection from './CategorySection/CategorySection';
-import OurProducts from './OurProductsSection/OurProducts';
+import HeroSection from '../../HeroSection/HeroSection';
+import CategorySection from '../../CategorySection/CategorySection';
+import OurProducts from '../../OurProductsSection/OurProducts';
 
 function HomePage() {
     return (

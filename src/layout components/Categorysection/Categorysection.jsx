@@ -1,6 +1,6 @@
-import dining from '../../../assets/images/dining.png'
-import bedroom from '../../../assets/images/bedroom.png'
-import livingroom from '../../../assets/images/livingroom.png'
+import dining from '../../assets/images/dining.png'
+import bedroom from '../../assets/images/bedroom.png'
+import livingroom from '../../assets/images/livingroom.png'
 
 import './categorySection.scss';
 

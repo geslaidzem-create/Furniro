@@ -1,4 +1,4 @@
-import heroBanner from '../../../assets/images/hero-banner.jpg';
+import heroBanner from '../../assets/images/hero-banner.jpg';
 import './HeroSection.scss';
 
 function HeroSection() {

@@ -1,0 +1,22 @@
+.showMoreBtn {
+    width: 245px;
+height: 48px;
+border: 1px solid var(--Primary, #B88E2F);
+background: #FFF;
+color: var(--Primary, #B88E2F);
+font-family: Poppins;
+font-size: 16px;
+font-style: normal;
+font-weight: 600;
+line-height: 150%; /* 24px */
+margin-top: 32px;
+
+&:hover {
+
+border: 1px solid var(--Primary, #B88E2F);
+background: var(--Primary, #B88E2F);
+color: #FFF;
+cursor: pointer;
+transition: 0.3s;
+}
+}
