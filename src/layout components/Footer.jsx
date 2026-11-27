@@ -43,11 +43,6 @@ function Footer() {
           </form>
         </div>
       </div>
-
-      {/* ქვედა ზოლი (Copyright) */}
-      <div className="footer-bottom">
-        <p>2023 furino. All rights reverved</p>
-      </div>
     </footer>
   );
 }

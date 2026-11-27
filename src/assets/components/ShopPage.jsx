@@ -5,37 +5,42 @@ import "./ShopPage.scss";
 const DB_URL =
   "https://raw.githubusercontent.com/Ommadure/Furniture-ecommerce/main/data/db.json";
 
+function parseNumericPrice(raw) {
+  if (typeof raw === "number" && !Number.isNaN(raw)) return raw;
+  if (typeof raw === "string") {
+    const cleaned = raw.replace(/[^0-9.]/g, "");
+    const parsed = parseFloat(cleaned);
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  return 0;
+}
+
 function resolveApiImage(item) {
-    const raw =
-        item.thumbnails?.[0]?.[5] ||
-        item.thumbnails?.[0]?.[4] ||
-        item.thumbnails?.[0]?.[3] ||
-        item.thumbnails?.[0]?.[0] ||
-        item.image ||
-        item.img ||
-        item.imageUrl ||
-        item.imgUrl ||
-        item.thumbnail ||
-        item.photo ||
-        (Array.isArray(item.images) ? item.images[0] : "") ||
-        "";
+  const raw =
+    item.thumbnails?.[0]?.[5] ||
+    item.thumbnails?.[0]?.[4] ||
+    item.thumbnails?.[0]?.[3] ||
+    item.thumbnails?.[0]?.[0] ||
+    item.image ||
+    item.img ||
+    item.imageUrl ||
+    item.imgUrl ||
+    item.thumbnail ||
+    item.photo ||
+    (Array.isArray(item.images) ? item.images[0] : "") ||
+    "";
 
-    if (!raw || typeof raw !== "string") return "";
+  if (!raw || typeof raw !== "string") return "";
 
-    const trimmed = raw.trim();
+  const trimmed = raw.trim();
 
-    if (
-        trimmed.startsWith("http://") ||
-        trimmed.startsWith("https://")
-    ) {
-        return trimmed;
-    }
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
 
-    const clean = trimmed
-        .replace(/^\.?\//, "")
-        .replace(/^public\//, "");
+  const clean = trimmed.replace(/^\.?\//, "").replace(/^public\//, "");
 
-    return `https://raw.githubusercontent.com/Ommadure/Furniture-ecommerce/main/public/${clean}`;
+  return `https://raw.githubusercontent.com/Ommadure/Furniture-ecommerce/main/public/${clean}`;
 }
 
 function normalizeProducts(data) {
@@ -54,6 +59,13 @@ function normalizeProducts(data) {
           ? `-${String(discount).replace(/^-/, "")}`
           : null);
 
+    const numericPrice = parseNumericPrice(
+      item.price ?? item.salePrice ?? item.newPrice
+    );
+    const numericOldPrice = parseNumericPrice(
+      item.oldPrice ?? item.originalPrice ?? item.comparePrice
+    );
+
     return {
       ...item,
       id: item.id ?? item.product_id ?? index + 1,
@@ -61,8 +73,8 @@ function normalizeProducts(data) {
       title: item.title || item.name || `Product ${index + 1}`,
       subtitle: item.subtitle || item.description || item.category || "",
       category: item.category || "General",
-      price: Number(item.price) || 0,
-      oldPrice: item.oldPrice ? Number(item.oldPrice) : null,
+      price: numericPrice,
+      oldPrice: numericOldPrice > 0 ? numericOldPrice : null,
       badge,
       image: resolveApiImage(item),
     };
@@ -70,7 +82,7 @@ function normalizeProducts(data) {
 }
 
 function formatPrice(value) {
-  if (!value && value !== 0) return "";
+  if (value === undefined || value === null || value === "") return "";
   return `Rp ${Number(value).toLocaleString("id-ID")}`;
 }
 
@@ -209,7 +221,15 @@ function ShopPage({ onNavigateHome, onSelectProduct, onAddToCart }) {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (!ignore) {
-          setProducts(normalizeProducts(data));
+          const normalized = normalizeProducts(data);
+          setProducts(normalized);
+          const highest = normalized.reduce(
+            (max, p) => (p.price > max ? p.price : max),
+            0
+          );
+          if (highest > 0) {
+            setMaxPrice(Math.ceil(highest));
+          }
         }
       } catch (err) {
         if (!ignore) {
@@ -231,6 +251,17 @@ function ShopPage({ onNavigateHome, onSelectProduct, onAddToCart }) {
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategory, maxPrice, sortBy, showCount]);
+
+  const priceBounds = useMemo(() => {
+    const prices = products.map((p) => p.price).filter((p) => p > 0);
+    if (prices.length === 0) {
+      return { min: 0, max: 20000000, step: 100 };
+    }
+    const min = Math.floor(Math.min(...prices));
+    const max = Math.ceil(Math.max(...prices));
+    const step = Math.max(1, Math.round((max - min) / 100));
+    return { min: 0, max, step };
+  }, [products]);
 
   const categories = useMemo(() => {
     const unique = new Set(products.map((p) => p.category).filter(Boolean));
@@ -414,11 +445,11 @@ function ShopPage({ onNavigateHome, onSelectProduct, onAddToCart }) {
               <input
                 id="maxPriceRange"
                 type="range"
-                min="100000"
-                max="20000000"
-                step="500000"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
+                min={priceBounds.min}
+                max={priceBounds.max}
+                step={priceBounds.step}
+                value={Math.min(maxPrice, priceBounds.max)}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
               />
             </div>
           </div>

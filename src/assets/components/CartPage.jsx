@@ -143,12 +143,19 @@ function TrashIcon() {
   );
 }
 
-function CartPage({ onNavigateHome, onNavigateShop, items, setItems }) {
+function CartPage({
+  onNavigateHome,
+  onNavigateShop,
+  onNavigateCheckout,
+  items,
+  setItems,
+}) {
   const [localItems, setLocalItems] = useState(DEFAULT_CART_ITEMS);
   const [checkoutMessage, setCheckoutMessage] = useState("");
 
   const cartList = Array.isArray(items) ? items : localItems;
-  const updateCartList = typeof setItems === "function" ? setItems : setLocalItems;
+  const updateCartList =
+    typeof setItems === "function" ? setItems : setLocalItems;
 
   const handleQuantityChange = (id, rawValue) => {
     const parsed = Math.max(1, Number.parseInt(rawValue, 10) || 1);
@@ -163,7 +170,8 @@ function CartPage({ onNavigateHome, onNavigateShop, items, setItems }) {
 
   const totalAmount = useMemo(() => {
     return cartList.reduce(
-      (sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1),
+      (sum, item) =>
+        sum + (Number(item.price) || 0) * (Number(item.quantity) || 1),
       0
     );
   }, [cartList]);
@@ -173,7 +181,11 @@ function CartPage({ onNavigateHome, onNavigateShop, items, setItems }) {
       setCheckoutMessage("Your cart is empty.");
       return;
     }
-    setCheckoutMessage("Proceeding to checkout...");
+    if (typeof onNavigateCheckout === "function") {
+      onNavigateCheckout();
+    } else {
+      setCheckoutMessage("Proceeding to checkout...");
+    }
   };
 
   return (
@@ -234,7 +246,10 @@ function CartPage({ onNavigateHome, onNavigateShop, items, setItems }) {
                   const displayName = item.name || item.title || "Product";
 
                   return (
-                    <div key={`${item.id ?? displayName}-${idx}`} className="cart-row">
+                    <div
+                      key={`${item.id ?? displayName}-${idx}`}
+                      className="cart-row"
+                    >
                       <div className="cart-row__thumb">
                         {item.image && <img src={item.image} alt={displayName} />}
                       </div>
@@ -281,12 +296,16 @@ function CartPage({ onNavigateHome, onNavigateShop, items, setItems }) {
 
             <div className="cart-totals__row">
               <span className="label">Subtotal</span>
-              <span className="value value--muted">{formatPrice(totalAmount)}</span>
+              <span className="value value--muted">
+                {formatPrice(totalAmount)}
+              </span>
             </div>
 
             <div className="cart-totals__row cart-totals__row--total">
               <span className="label">Total</span>
-              <span className="value value--accent">{formatPrice(totalAmount)}</span>
+              <span className="value value--accent">
+                {formatPrice(totalAmount)}
+              </span>
             </div>
 
             <button

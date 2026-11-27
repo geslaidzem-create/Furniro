@@ -6,6 +6,7 @@ import "./layout components/Footer.scss";
 import HomePage from "./layout components/pages/homepage/HomePage";
 import ShopPage from "./assets/components/ShopPage";
 import CartPage from "./assets/components/CartPage";
+import CheckoutPage from "./assets/components/CheckoutPage";
 import AboutPage from "./assets/components/AboutPage";
 import ContactPage from "./assets/components/ContactPage";
 import SingleProductPage from "./assets/components/SingleProductPage";
@@ -15,10 +16,14 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [cartItems, setCartItems] = useState([]);
 
+  const goToPage = (page) => {
+    setActivePage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleSelectProduct = (product) => {
     setSelectedProduct(product);
-    setActivePage("single-product");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    goToPage("single-product");
   };
 
   const handleAddToCart = (product) => {
@@ -60,9 +65,14 @@ function App() {
     });
   };
 
+  const handleOrderComplete = () => {
+    setCartItems([]);
+    goToPage("home");
+  };
+
   return (
     <>
-      <Header onNavigate={setActivePage} />
+      <Header onNavigate={goToPage} />
 
       {activePage === "home" && (
         <HomePage
@@ -73,7 +83,7 @@ function App() {
 
       {activePage === "shop" && (
         <ShopPage
-          onNavigateHome={() => setActivePage("home")}
+          onNavigateHome={() => goToPage("home")}
           onSelectProduct={handleSelectProduct}
           onAddToCart={handleAddToCart}
         />
@@ -82,8 +92,9 @@ function App() {
       {activePage === "single-product" && (
         <SingleProductPage
           product={selectedProduct}
-          onNavigateHome={() => setActivePage("home")}
-          onNavigateShop={() => setActivePage("shop")}
+          onSelectProduct={handleSelectProduct}
+          onNavigateHome={() => goToPage("home")}
+          onNavigateShop={() => goToPage("shop")}
           onAddToCart={handleAddToCart}
         />
       )}
@@ -92,20 +103,29 @@ function App() {
         <CartPage
           items={cartItems}
           setItems={setCartItems}
-          onNavigateHome={() => setActivePage("home")}
-          onNavigateShop={() => setActivePage("shop")}
+          onNavigateHome={() => goToPage("home")}
+          onNavigateShop={() => goToPage("shop")}
+          onNavigateCheckout={() => goToPage("checkout")}
+        />
+      )}
+
+      {activePage === "checkout" && (
+        <CheckoutPage
+          items={cartItems}
+          onNavigateHome={() => goToPage("home")}
+          onOrderComplete={handleOrderComplete}
         />
       )}
 
       {activePage === "about" && (
         <AboutPage
-          onNavigateHome={() => setActivePage("home")}
-          onNavigateShop={() => setActivePage("shop")}
+          onNavigateHome={() => goToPage("home")}
+          onNavigateShop={() => goToPage("shop")}
         />
       )}
 
       {activePage === "contact" && (
-        <ContactPage onNavigateHome={() => setActivePage("home")} />
+        <ContactPage onNavigateHome={() => goToPage("home")} />
       )}
 
       <Footer />

@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import productimg from "../images/productcardimg.png";
 import "./SingleProductPage.scss";
 
+const DB_URL =
+  "https://raw.githubusercontent.com/Ommadure/Furniture-ecommerce/main/data/db.json";
+
 const REPO_RAW_BASE =
   "https://raw.githubusercontent.com/Ommadure/Furniture-ecommerce/main/";
 
@@ -60,6 +63,22 @@ function getGalleryImages(product) {
   return resolved.length > 0 ? resolved : [productimg];
 }
 
+function getCardImage(item) {
+  if (!item) return productimg;
+  if (item.image) return item.image;
+  const raw =
+    item.thumbnails?.[0]?.[5] ||
+    item.thumbnails?.[0]?.[4] ||
+    item.thumbnails?.[0]?.[3] ||
+    item.thumbnails?.[0]?.[0] ||
+    item.img ||
+    item.imageUrl ||
+    item.thumbnail ||
+    (Array.isArray(item.images) ? item.images[0] : "") ||
+    "";
+  return resolveImg(raw) || productimg;
+}
+
 function formatPriceValue(value) {
   if (value === undefined || value === null || value === "") {
     return "Rp 250.000";
@@ -76,23 +95,49 @@ function formatPriceValue(value) {
 
 function SingleProductPage({
   product,
+  allProducts = [],
+  onSelectProduct,
   onNavigateHome,
   onNavigateShop,
   onAddToCart,
 }) {
   const gallery = getGalleryImages(product);
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
-  const [selectedSize, setSelectedSize] = useState("L");
-  const [selectedColor, setSelectedColor] = useState("#816DFA");
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
   const [addedMessage, setAddedMessage] = useState(false);
+  const [relatedSource, setRelatedSource] = useState(allProducts);
+  const [showAllRelated, setShowAllRelated] = useState(false);
 
   useEffect(() => {
     setSelectedImgIndex(0);
     setQuantity(1);
     setAddedMessage(false);
+    setShowAllRelated(false);
   }, [product]);
+
+  useEffect(() => {
+    if (Array.isArray(allProducts) && allProducts.length > 0) {
+      setRelatedSource(allProducts);
+      return;
+    }
+
+    let ignore = false;
+    fetch(DB_URL)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (ignore) return;
+        const list = Array.isArray(data)
+          ? data
+          : data?.products || data?.furniture || data?.items || data?.data || [];
+        setRelatedSource(list);
+      })
+      .catch(() => {});
+
+    return () => {
+      ignore = true;
+    };
+  }, [allProducts]);
 
   const title = product?.title || product?.name || "Asgaard sofa";
   const priceValue = product?.price ?? product?.salePrice ?? 250000;
@@ -105,22 +150,29 @@ function SingleProductPage({
 
   const mainImage = gallery[selectedImgIndex] || gallery[0] || productimg;
 
-  const colors = [
-    { name: "Purple", hex: "#816DFA" },
-    { name: "Black", hex: "#000000" },
-    { name: "Gold", hex: "#B88E2F" },
-  ];
+  const currentKey = String(
+    product?.id ?? product?.product_id ?? product?.title ?? product?.name ?? ""
+  );
 
-  const sizes = ["L", "XL", "XS"];
+  const filteredRelated = relatedSource.filter((item) => {
+    const itemKey = String(
+      item?.id ?? item?.product_id ?? item?.title ?? item?.name ?? ""
+    );
+    return itemKey && itemKey !== currentKey;
+  });
+
+  const visibleRelated = showAllRelated
+    ? filteredRelated.slice(0, 8)
+    : filteredRelated.slice(0, 4);
 
   const handleAddToCart = () => {
     if (typeof onAddToCart === "function") {
       onAddToCart({
         ...product,
         title,
+        name: title,
+        price: Number(String(priceValue).replace(/[^0-9.-]+/g, "")) || 250000,
         image: mainImage,
-        size: selectedSize,
-        color: selectedColor,
         quantity,
       });
     }
@@ -209,42 +261,6 @@ function SingleProductPage({
 
           <p className="single-product-desc">{shortDesc}</p>
 
-          <div className="single-option-group">
-            <span className="single-option-label">Size</span>
-            <div className="size-options">
-              {sizes.map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  className={`size-btn ${
-                    selectedSize === size ? "is-selected" : ""
-                  }`}
-                  onClick={() => setSelectedSize(size)}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="single-option-group">
-            <span className="single-option-label">Color</span>
-            <div className="color-options">
-              {colors.map((c) => (
-                <button
-                  key={c.hex}
-                  type="button"
-                  className={`color-swatch ${
-                    selectedColor === c.hex ? "is-selected" : ""
-                  }`}
-                  style={{ backgroundColor: c.hex }}
-                  onClick={() => setSelectedColor(c.hex)}
-                  aria-label={c.name}
-                />
-              ))}
-            </div>
-          </div>
-
           <div className="single-actions-row">
             <div className="quantity-box">
               <button
@@ -270,10 +286,6 @@ function SingleProductPage({
               onClick={handleAddToCart}
             >
               Add To Cart
-            </button>
-
-            <button type="button" className="compare-btn">
-              + Compare
             </button>
           </div>
 
@@ -322,12 +334,14 @@ function SingleProductPage({
         </div>
       </section>
 
-      {/* TABS SECTION */}
+      {/* TABS & GALLERY PREVIEW SECTION */}
       <section className="single-product-tabs">
         <div className="tabs-header">
           <button
             type="button"
-            className={`tab-btn ${activeTab === "description" ? "is-active" : ""}`}
+            className={`tab-btn ${
+              activeTab === "description" ? "is-active" : ""
+            }`}
             onClick={() => setActiveTab("description")}
           >
             Description
@@ -372,9 +386,8 @@ function SingleProductPage({
 
           {activeTab === "additional" && (
             <p>
-              Selected size: <strong>{selectedSize}</strong> · Selected color:{" "}
-              <strong>{selectedColor}</strong> · Crafted for everyday home and
-              interior comfort.
+              Crafted for everyday home and interior comfort with durable
+              materials and clean detailing.
             </p>
           )}
 
@@ -382,6 +395,99 @@ function SingleProductPage({
             <p>5 verified customer reviews for {title}.</p>
           )}
         </div>
+
+        <div className="single-showcase-pair">
+          {gallery.slice(0, 2).map((imgSrc, idx) => (
+            <div key={`${imgSrc}-pair-${idx}`} className="showcase-pair__card">
+              <img
+                src={imgSrc}
+                alt={`${title} detail ${idx + 1}`}
+                onError={(e) => {
+                  if (e.currentTarget.src !== productimg) {
+                    e.currentTarget.src = productimg;
+                  }
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* RELATED PRODUCTS SECTION */}
+      <section className="related-products-section">
+        <h2 className="related-products-title">Related Products</h2>
+
+        <div className="related-products-grid">
+          {visibleRelated.map((item, idx) => {
+            const itemTitle = item.title || item.name || `Product ${idx + 1}`;
+            const itemSubtitle =
+              item.subtitle || item.description || item.category || "";
+            const itemPrice = formatPriceValue(item.price ?? item.salePrice ?? 0);
+            const itemOldPrice = item.oldPrice
+              ? formatPriceValue(item.oldPrice)
+              : null;
+            const itemImg = getCardImage(item);
+
+            return (
+              <article
+                key={item.id ?? item.product_id ?? idx}
+                className="related-card"
+                onClick={() => {
+                  if (typeof onSelectProduct === "function") {
+                    onSelectProduct(item);
+                  }
+                }}
+              >
+                <div className="related-card__img-box">
+                  <img
+                    src={itemImg}
+                    alt={itemTitle}
+                    loading="lazy"
+                    onError={(e) => {
+                      if (e.currentTarget.src !== productimg) {
+                        e.currentTarget.src = productimg;
+                      }
+                    }}
+                  />
+                  {item.badge && (
+                    <span
+                      className={`related-badge ${
+                        String(item.badge).toLowerCase() === "new"
+                          ? "related-badge--new"
+                          : "related-badge--sale"
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+
+                <div className="related-card__body">
+                  <h3>{itemTitle}</h3>
+                  {itemSubtitle && <p className="related-subtitle">{itemSubtitle}</p>}
+                  <div className="related-prices">
+                    <span className="related-price">{itemPrice}</span>
+                    {itemOldPrice && (
+                      <span className="related-old-price">{itemOldPrice}</span>
+                    )}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        {filteredRelated.length > 4 && (
+          <div className="related-more-wrapper">
+            <button
+              type="button"
+              className="related-more-btn"
+              onClick={() => setShowAllRelated((prev) => !prev)}
+            >
+              {showAllRelated ? "Show Less" : "Show More"}
+            </button>
+          </div>
+        )}
       </section>
     </main>
   );
